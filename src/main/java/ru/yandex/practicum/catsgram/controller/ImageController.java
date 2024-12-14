@@ -21,7 +21,7 @@ public class ImageController {
     }
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/posts/{postID}/images")
+    @PostMapping("/posts/{postId}/images")
     public List<Image> addPostImages(@PathVariable("postId") long postId,
                                      @RequestParam("image")List<MultipartFile> files) {
         return imageService.saveImages(postId, files);
@@ -36,7 +36,6 @@ public class ImageController {
                         .filename(imageData.getName())
                         .build()
         );
-
         return new ResponseEntity<>(imageData.getData(), headers, HttpStatus.OK);
     }
 }

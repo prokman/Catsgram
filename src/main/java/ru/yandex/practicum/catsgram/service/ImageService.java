@@ -1,6 +1,7 @@
 package ru.yandex.practicum.catsgram.service;
 
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,7 +28,8 @@ public class ImageService {
     private final Map<Long, Image> images = new HashMap<>();
     private final PostService postService;
 
-    private final String imageDirectory = "C:\\Users\\prokm\\IdeaProjects\\MyYaPracticum\\Catsgram\\img";
+    // @Value("${Catsgram.img}")
+    private String imageDirectory = "C:\\Users\\rzhom\\IdeaProjects\\Catsgram\\img";
 
     public ImageData getImageData(long imageId) {
         if (!images.containsKey(imageId)) {
@@ -57,7 +59,7 @@ public class ImageService {
 
     public List<Image> getPostImage(Long postId) {
         return images.values().stream()
-                .filter(image -> image.getPostId()==postId)
+                .filter(image -> image.getPostId() == postId)
                 .collect(Collectors.toList());
     }
 
@@ -66,7 +68,7 @@ public class ImageService {
             String uniqueFileName = String.format("%d.%s", Instant.now().toEpochMilli(),
                     StringUtils.getFilenameExtension(file.getOriginalFilename()));
 
-            Path uploadPath = Paths.get(imageDirectory,String.valueOf(post.getAuthorId()), post.getId().toString());
+            Path uploadPath = Paths.get(imageDirectory, String.valueOf(post.getAuthorId()), post.getId().toString());
             Path filePath = uploadPath.resolve(uniqueFileName);
 
             if (!Files.exists(uploadPath)) {
@@ -80,11 +82,11 @@ public class ImageService {
     }
 
     public List<Image> saveImages(long postId, List<MultipartFile> files) {
-        return files.stream().map(file -> saveImage(postId,file)).collect(Collectors.toList());
+        return files.stream().map(file -> saveImage(postId, file)).collect(Collectors.toList());
     }
 
     private Image saveImage(long postId, MultipartFile file) {
-        Post post = postService.findPostById(postId).orElseThrow(()-> new ConditionsNotMetException("пост не найден"));
+        Post post = postService.findPostById(postId).orElseThrow(() -> new ConditionsNotMetException("пост не найден"));
         Path filePath = saveFile(file, post);
         long imageId = getNextId();
 
@@ -94,9 +96,8 @@ public class ImageService {
         image.setPostId(postId);
 
         image.setOriginalFileName(file.getOriginalFilename());
-        images.put(imageId,image);
+        images.put(imageId, image);
         return image;
-
     }
 
     private long getNextId() {
@@ -107,7 +108,6 @@ public class ImageService {
                 .orElse(0);
         return ++currentMaxId;
     }
-
 
 
 }
