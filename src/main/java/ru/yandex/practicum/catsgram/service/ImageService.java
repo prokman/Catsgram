@@ -29,7 +29,7 @@ public class ImageService {
     private final PostService postService;
 
     // @Value("${Catsgram.img}")
-    private String imageDirectory = "C:\\Users\\rzhom\\IdeaProjects\\Catsgram\\img";
+    private String imageDirectory = ".\\src\\main\\resources\\img";
 
     public ImageData getImageData(long imageId) {
         if (!images.containsKey(imageId)) {
@@ -82,7 +82,9 @@ public class ImageService {
     }
 
     public List<Image> saveImages(long postId, List<MultipartFile> files) {
-        return files.stream().map(file -> saveImage(postId, file)).collect(Collectors.toList());
+        return files.stream()
+                .map(file -> saveImage(postId, file))
+                .collect(Collectors.toList());
     }
 
     private Image saveImage(long postId, MultipartFile file) {
@@ -92,10 +94,10 @@ public class ImageService {
 
         Image image = new Image();
         image.setId(imageId);
-        image.setFilePath(filePath.toString());
         image.setPostId(postId);
-
+        image.setFilePath(filePath.toString());
         image.setOriginalFileName(file.getOriginalFilename());
+
         images.put(imageId, image);
         return image;
     }

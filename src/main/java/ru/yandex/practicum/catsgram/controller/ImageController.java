@@ -32,7 +32,9 @@ public class ImageController {
         ImageData imageData = imageService.getImageData(imageId);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentDisposition(
-                ContentDisposition.attachment()
+                ContentDisposition
+                        //.inline()
+                        .attachment()
                         .filename(imageData.getName())
                         .build()
         );
