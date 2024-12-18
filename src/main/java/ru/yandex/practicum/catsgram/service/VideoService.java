@@ -1,12 +1,15 @@
 package ru.yandex.practicum.catsgram.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import ru.yandex.practicum.catsgram.exception.NotFoundException;
+import ru.yandex.practicum.catsgram.exception.VideoFileException;
 import ru.yandex.practicum.catsgram.model.Post;
 import ru.yandex.practicum.catsgram.model.Video;
+import ru.yandex.practicum.catsgram.model.VideoData;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,7 +26,8 @@ import java.util.stream.Collectors;
 public class VideoService {
     private final Map<Long, Video> videos = new HashMap<>();
     private final PostService postService;
-    private String imageDirectory = ".\\src\\main\\resources\\video";
+    @Value("${Catsgram.video-directory}")
+    private String imageDirectory;            //= ".\\src\\main\\resources\\video";
 
     public List<Video> saveVideos(long postId, List<MultipartFile> files) {
         return files.stream()
@@ -62,12 +66,35 @@ public class VideoService {
         }
     }
 
-    public List<Video> getPostVide(Long postId) {
+    public List<Video> getPostVideo(Long postId) {
         return videos.values().stream()
                 .filter(video -> video.getPostId() == postId)
                 .collect(Collectors.toList());
     }
 
+    public VideoData getVideoData(long videoId) {
+        if (!videos.containsKey(videoId)) {
+            throw new NotFoundException("Видео с id-" + videoId + " не найдено");
+        }
+        Video video = videos.get(videoId);
+        byte[] data = loadFile(video);
+        return new VideoData(data, video.getOriginalFileName());
+    }
+
+    private byte[] loadFile(Video video) {
+        Path path = Paths.get(video.getFilePath());
+        if (Files.exists(path)) {
+            try {
+                return Files.readAllBytes(path);
+            } catch (IOException e) {
+                throw new VideoFileException("Ошибка чтения файла. id-" + video.getId() + " name " +
+                        video.getOriginalFileName(), e);
+            }
+        } else {
+            throw new NotFoundException("файл не найден id-"
+                    + video.getId() + ", name: " + video.getOriginalFileName());
+        }
+    }
 
     private long getNextId() {
         long currentMaxId = videos.keySet()
